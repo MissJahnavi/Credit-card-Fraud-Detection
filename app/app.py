@@ -1,19 +1,3 @@
-"""
-app/app.py
-----------
-Streamlit Dashboard — Credit Card Fraud Detection & Risk Analysis Platform
-
-Sections:
-  1. Project Overview
-  2. Fraud Prediction Simulator
-  3. Fraud Analytics Dashboard
-  4. Model Performance
-  5. Feature Importance
-
-Run with:
-    streamlit run app/app.py
-"""
-
 import os
 import sys
 import json
@@ -92,14 +76,21 @@ st.markdown("""
 # Loaders (cached)
 # ---------------------------------------------------------------------------
 
+
 @st.cache_data
 def load_data():
-    """Load and preprocess dataset for dashboard analytics."""
-    if not os.path.exists(DATA_PATH):
-        return None
-    df = pd.read_csv(DATA_PATH)
-    df["Hour"] = (df["Time"] / 3600) % 24
-    df["Class_Label"] = df["Class"].map({0: "Normal", 1: "Fraud"})
+    if os.path.exists(DATA_PATH):
+        df = pd.read_csv(DATA_PATH)
+    else:
+        # Generate realistic sample data for demo deployment
+        np.random.seed(42)
+        n = 5000
+        df = pd.DataFrame(np.random.randn(n, 28), columns=[f'V{i}' for i in range(1, 29)])
+        df['Time'] = np.random.uniform(0, 172792, n)
+        df['Amount'] = np.abs(np.random.exponential(88, n))
+        df['Class'] = np.random.choice([0, 1], n, p=[0.998, 0.002])
+    df['Hour'] = (df['Time'] / 3600) % 24
+    df['Class_Label'] = df['Class'].map({0: 'Normal', 1: 'Fraud'})
     return df
 
 
@@ -119,7 +110,6 @@ def load_metadata():
         return None
     with open(META_PATH) as f:
         return json.load(f)
-
 
 # ---------------------------------------------------------------------------
 # Sidebar Navigation
